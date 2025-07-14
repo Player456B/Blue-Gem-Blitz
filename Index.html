@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=480, initial-scale=1.0">
+  <title>BlueGem Blitz™ - Slot Game</title>
+  <style>
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #0c267c;
+  color: #ffe14d;
+  min-width: 320px;
+  min-height: 100vh;
+}
+.screen {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.screen.active {
+  display: flex;
+}
+.company-logo {
+  font-size: 3em;
+  font-weight: bold;
+  letter-spacing: 3px;
+  color: #3fc9f7;
+  margin-bottom: 1em;
+  text-shadow: 0 0 8px #222, 0 0 18px #00cfff;
+}
+.loading-text {
+  font-size: 1.8em;
+  margin: 1em 0;
+}
+.progress-bar {
+  width: 300px;
+  height: 18px;
+  background: #222;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-top: 2em;
+  box-shadow: 0 0 8px #00eaff55;
+}
+.progress {
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #00cfff, #3fc9f7 60%);
+  border-radius: 20px;
+  transition: width 0.7s;
+}
+
+.game-title {
+  font-size: 2.2em;
+  font-weight: bold;
+  color: #ffe14d;
+  margin: 1em 0;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px #194dff, 0 0 20px #00cfff;
+}
+
+#enterGameBtn {
+  font-size: 1.5em;
+  padding: 0.7em 2em;
+  background: #2196f3;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  margin-top: 1em;
+  cursor: pointer;
+  box-shadow: 0 0 12px #00cfff88;
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100vw;
+  background: #0c267c;
+  padding: 0.5em 1.5em;
+  box-sizing: border-box;
+}
+.back-btn, .lobby-btn {
+  font-size: 1.3em;
+  color: #ffe14d;
+  cursor: pointer;
+  font-weight: bold;
+  text-shadow: 0 0 8px #222;
+}
+
+.lobby-btn {
+  border: 2px solid #ffe14d;
+  border-radius: 50px;
+  padding: 0.2em 1em;
+  background: #2233aa;
+  margin-left: 1em;
+}
+
+.slot-area {
+  margin-top: 2em;
+  width: 95vw;
+  max-width: 520px;
+  background: #12349a;
+  border-radius: 24px;
+  box-shadow: 0 0 32px #0016ab66;
+  padding: 2em 1em 1em 1em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.reels {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  margin-bottom: 1.5em;
+}
+.reel {
+  width: 52px;
+  height: 260px;
+  background: #2068c1;
+  border: 2px solid #19e5ff;
+  margin: 0 6px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  box-shadow: 0 0 16px #00eaff44;
+}
+
+.slot-controls {
+  margin-top: 1em;
+  display: flex;
+  gap: 1em;
+}
+.slot-controls button {
+  background: #1e88e5;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1em;
+  font-weight: bold;
+  padding: 0.5em 1em;
+  cursor: pointer;
+  box-shadow: 0 0 8px #00eaff88;
+  transition: background 0.2s;
+}
+.slot-controls button:hover {
+  background: #1565c0;
+}
+
+.slot-info {
+  margin-top: 1em;
+  width: 100%;
+  background: #0c267c;
+  color: #ffe14d;
+  padding: 1em;
+  border-radius: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.7em;
+  box-shadow: 0 0 8px #00cfff33;
+  font-size: 1.08em;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 100;
+  background: rgba(6,20,60,0.98);
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 2em 0;
+}
+.modal-content {
+  background: #0c267c;
+  color: #ffe14d;
+  border-radius: 18px;
+  box-shadow: 0 0 20px #0039e7bb;
+  max-width: 540px;
+  width: 96vw;
+  margin: 2em auto;
+  padding: 2em 1.2em 1em 1.2em;
+  position: relative;
+}
+.close {
+  position: absolute;
+  top: 0.7em;
+  right: 1.1em;
+  font-size: 2em;
+  color: #fff;
+  cursor: pointer;
+}
+.paytable-section {
+  margin-bottom: 2em;
+}
+.symbol-block {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.7em;
+}
+.symbol-img {
+  width: 55px;
+  height: 55px;
+  border-radius: 7px;
+  margin-right: 1em;
+  background: #0c267c;
+  box-shadow: 0 0 8px #00eaff88;
+}
+.paytable-list table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.paytable-list th, .paytable-list td {
+  padding: 0.3em 0.4em;
+  text-align: left;
+  border-bottom: 1px solid #12349a;
+}
+.paytable-list td img {
+  width: 35px;
+  height: 35px;
+  border-radius: 4px;
+  background: #0c267c;
+}
+.symbol-red {
+  color: #e64a19;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+.symbol-orange {
+  color: #ff9800;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+.symbol-purple {
+  color: #aa00ff;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+.symbol-blue {
+  color: #2196f3;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+.symbol-yellow {
+  color: #ffeb3b;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+.symbol-green {
+  color: #43a047;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+@media (max-width: 600px) {
+  .modal-content, .slot-area {
+    padding: 1em 0.3em;
+    font-size: 0.95em;
+  }
+  .paytable-section, .paytable-list th, .paytable-list td {
+    font-size: 0.93em;
+  }
+}
+  </style>
+</head>
+<body>
+  <!-- Loading Page -->
+  <div id="loadingScreen" class="screen active">
+    <div class="company-logo">BlueGem</div>
+    <div class="loading-text">Loading...</div>
+    <div class="progress-bar"><div class="progress"></div></div>
+  </div>
+
+  <!-- Game Entry Page -->
+  <div id="entryScreen" class="screen">
+    <div class="game-title">BlueGem Blitz™</div>
+    <button id="enterGameBtn">Enter Game</button>
+  </div>
+
+  <!-- Slot Game -->
+  <div id="gameScreen" class="screen">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <span class="back-btn" id="backBtn" title="Back">&#8592;</span>
+      <span class="game-title">BlueGem Blitz™</span>
+      <span class="lobby-btn" id="lobbyBtn">Blitz Lobby</span>
+    </div>
+
+    <!-- Paytable Modal -->
+    <div id="paytableModal" class="modal">
+      <div class="modal-content">
+        <span class="close" id="closePaytable">&times;</span>
+        <div class="paytable-section">
+          <h2>PAYTABLE</h2>
+          <div class="symbol-block">
+            <div><img src="diamond.png" alt="Diamond Wild" class="symbol-img"></div>
+            <div>
+              <strong>WILD</strong><br>
+              Substitutes for all except for SCATTER<br>
+              Appears on Reels 2, 3, 4, 5 and 6 only
+            </div>
+          </div>
+          <div class="symbol-block">
+            <div><img src="freegames.png" alt="Scatter" class="symbol-img"></div>
+            <div>
+              <strong>SCATTER</strong><br>
+              3 or more anywhere on reels triggers up to 100 free games
+            </div>
+          </div>
+          <div class="paytable-list">
+            <table>
+              <tr>
+                <th>Symbol</th><th>6x</th><th>5x</th><th>4x</th><th>3x</th><th>2x</th>
+              </tr>
+              <tr>
+                <td><img src="buffalo.png" alt="Buffalo"></td>
+                <td>Rs150</td><td>Rs125</td><td>Rs100</td><td>Rs75</td><td>Rs20</td>
+              </tr>
+              <tr>
+                <td><img src="puma.png" alt="Puma"></td>
+                <td>Rs125</td><td>Rs100</td><td>Rs75</td><td>Rs25</td><td>Rs7.50</td>
+              </tr>
+              <tr>
+                <td><img src="raccoon.png" alt="Raccoon"></td>
+                <td>Rs125</td><td>Rs100</td><td>Rs75</td><td>Rs25</td><td>Rs7.50</td>
+              </tr>
+              <tr>
+                <td><img src="bear.png" alt="Bear"></td>
+                <td>Rs100</td><td>Rs75</td><td>Rs40</td><td>Rs20</td><td>Rs5</td>
+              </tr>
+              <tr>
+                <td><img src="moose.png" alt="Moose"></td>
+                <td>Rs100</td><td>Rs75</td><td>Rs40</td><td>Rs20</td><td>Rs5</td>
+              </tr>
+              <tr>
+                <td><span class="symbol-red">A</span></td>
+                <td>Rs75</td><td>Rs50</td><td>Rs20</td><td>Rs10</td><td>-</td>
+              </tr>
+              <tr>
+                <td><span class="symbol-orange">K</span></td>
+                <td>Rs75</td><td>Rs50</td><td>Rs20</td><td>Rs10</td><td>-</td>
+              </tr>
+              <tr>
+                <td><span class="symbol-purple">Q</span></td>
+                <td>Rs60</td><td>Rs40</td><td>Rs15</td><td>Rs5</td><td>-</td>
+              </tr>
+              <tr>
+                <td><span class="symbol-blue">J</span></td>
+                <td>Rs60</td><td>Rs40</td><td>Rs15</td><td>Rs5</td><td>-</td>
+              </tr>
+              <tr>
+                <td><span class="symbol-yellow">10</span></td>
+                <td>Rs50</td><td>Rs40</td><td>Rs10</td><td>Rs5</td><td>-</td>
+              </tr>
+              <tr>
+                <td><span class="symbol-green">9</span></td>
+                <td>Rs50</td><td>Rs40</td><td>Rs10</td><td>Rs5</td><td>-</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <div class="paytable-section">
+          <h2>WAYS</h2>
+          <p>4096 ways is activated on all 6 reels<br>
+          Any combination of symbols on adjacent reels from left to right, beginning with the leftmost reel, will pay regardless of the symbol position on the reels, except Scatter.<br>
+          Only highest win paid per winning combination.</p>
+        </div>
+        <div class="paytable-section">
+          <h2>FREE GAMES</h2>
+          <p>
+            <strong>During Main Game:</strong><br>
+            3 Scatter Symbols = 8 Free Games<br>
+            4 Scatter Symbols = 15 Free Games<br>
+            5 Scatter Symbols = 25 Free Games<br>
+            6 Scatter Symbols = 100 Free Games<br>
+            <br>
+            <strong>During Free Games:</strong><br>
+            2 Scatters = 5 more Free Games<br>
+            3 Scatters = 8 more Free Games<br>
+            4 Scatters = 15 more Free Games<br>
+            5 Scatters = 25 more Free Games<br>
+            6 Scatters = 100 more Free Games<br>
+            <br>
+            Wild randomly multiplies wins by X2, X3, X5 when substituting, and appears on Reels 2-6 only during Free Games.<br>
+            More Free Games can be triggered infinitely.
+          </p>
+        </div>
+        <div class="paytable-section">
+          <strong>Malfunctions void all plays and pays.</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Slot Area (Graphics only, demo) -->
+    <div class="slot-area">
+      <div class="reels">
+        <div class="reel" id="reel1"></div>
+        <div class="reel" id="reel2"></div>
+        <div class="reel" id="reel3"></div>
+        <div class="reel" id="reel4"></div>
+        <div class="reel" id="reel5"></div>
+        <div class="reel" id="reel6"></div>
+      </div>
+      <div class="slot-controls">
+        <button id="paytableBtn">Paytable</button>
+        <button id="betSettingsBtn">Bet</button>
+        <button id="spinBtn">Spin</button>
+        <button id="autoplayBtn">Autoplay</button>
+        <button id="turboBtn">Turbo</button>
+      </div>
+      <div class="slot-info">
+        <div>COIN VALUE: <span id="coinValue">1</span></div>
+        <div>TOTAL BET: <span id="totalBet">40</span></div>
+        <div>WIN: <span id="winAmount">0</span></div>
+        <div>SPINS LEFT: <span id="spinsLeft">0</span></div>
+        <div>FREE GAMES WIN: <span id="freeGamesWin">0</span></div>
+        <div>MULTIPLIER: <span id="multiplier">1x</span></div>
+      </div>
+    </div>
+  </div>
+  <script>
+window.onload = function() {
+  // Loading bar animation
+  let progress = 0;
+  const loading = setInterval(() => {
+    progress += Math.random() * 18 + 8;
+    document.querySelector('.progress').style.width = Math.min(progress, 100) + "%";
+    if (progress >= 100) {
+      clearInterval(loading);
+      setTimeout(() => {
+        document.getElementById('loadingScreen').classList.remove('active');
+        document.getElementById('entryScreen').classList.add('active');
+      }, 600);
+    }
+  }, 250);
+};
+
+// Enter Game
+document.getElementById('enterGameBtn').onclick = function () {
+  document.getElementById('entryScreen').classList.remove('active');
+  document.getElementById('gameScreen').classList.add('active');
+};
+
+// Back to entry
+document.getElementById('backBtn').onclick = function () {
+  document.getElementById('gameScreen').classList.remove('active');
+  document.getElementById('entryScreen').classList.add('active');
+};
+
+// Lobby (demo: just alert)
+document.getElementById('lobbyBtn').onclick = function () {
+  alert("Returning to Blitz Lobby...");
+};
+
+// Paytable Modal
+document.getElementById('paytableBtn').onclick = function () {
+  document.getElementById('paytableModal').style.display = 'flex';
+};
+document.getElementById('closePaytable').onclick = function () {
+  document.getElementById('paytableModal').style.display = 'none';
+};
+
+// ==== Slot Logic (Demo only, not a real slot engine) ====
+const SYMBOLS = [
+  { img: 'buffalo.png', name: 'Buffalo' },
+  { img: 'puma.png', name: 'Puma' },
+  { img: 'raccoon.png', name: 'Raccoon' },
+  { img: 'bear.png', name: 'Bear' },
+  { img: 'moose.png', name: 'Moose' },
+  { img: 'diamond.png', name: 'Wild' },
+  { img: 'freegames.png', name: 'Scatter' },
+  { txt: 'A', cls: 'symbol-red' },
+  { txt: 'K', cls: 'symbol-orange' },
+  { txt: 'Q', cls: 'symbol-purple' },
+  { txt: 'J', cls: 'symbol-blue' },
+  { txt: '10', cls: 'symbol-yellow' },
+  { txt: '9', cls: 'symbol-green' }
+];
+
+let coinValue = 1, totalBet = 40, win = 0, spinsLeft = 0, freeGamesWin = 0, multiplier = 1;
+let isTurbo = false, isAutoplay = false;
+
+// Bet settings (demo only)
+document.getElementById('betSettingsBtn').onclick = function() {
+  coinValue++;
+  if (coinValue > 5) coinValue = 1;
+  totalBet = coinValue * 40;
+  document.getElementById('coinValue').textContent = coinValue;
+  document.getElementById('totalBet').textContent = totalBet;
+};
+
+// Turbo
+document.getElementById('turboBtn').onclick = function() {
+  isTurbo = !isTurbo;
+  this.style.background = isTurbo ? '#00eaff' : '#1e88e5';
+  this.style.color = isTurbo ? '#0c267c' : '#fff';
+};
+
+// Autoplay (demo only, not a real implementation)
+document.getElementById('autoplayBtn').onclick = function() {
+  if (!isAutoplay) {
+    spinsLeft = 10;
+    autoplaySpin();
+  } else {
+    spinsLeft = 0;
+  }
+  isAutoplay = !isAutoplay;
+  this.textContent = isAutoplay ? 'Stop Auto' : 'Autoplay';
+  document.getElementById('spinsLeft').textContent = spinsLeft;
+};
+
+function autoplaySpin() {
+  if (spinsLeft > 0 && isAutoplay) {
+    spinReels();
+    setTimeout(() => {
+      spinsLeft--;
+      document.getElementById('spinsLeft').textContent = spinsLeft;
+      autoplaySpin();
+    }, isTurbo ? 400 : 900);
+  } else {
+    isAutoplay = false;
+    document.getElementById('autoplayBtn').textContent = 'Autoplay';
+  }
+}
+
+// Spin
+document.getElementById('spinBtn').onclick = function() {
+  spinReels();
+};
+
+function spinReels() {
+  for (let r = 1; r <= 6; r++) {
+    const reel = document.getElementById('reel' + r);
+    reel.innerHTML = '';
+    for (let i = 0; i < 4; i++) {
+      let sym = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+      if (sym.img) {
+        let img = document.createElement('img');
+        img.src = sym.img;
+        img.alt = sym.name;
+        img.className = 'symbol-img';
+        reel.appendChild(img);
+      } else {
+        let span = document.createElement('span');
+        span.textContent = sym.txt;
+        span.className = sym.cls;
+        reel.appendChild(span);
+      }
+    }
+  }
+  // Fake "win" animation
+  win = Math.random() < 0.35 ? Math.floor(Math.random() * 300 + 10) : 0;
+  document.getElementById('winAmount').textContent = win;
+}
+  </script>
+</body>
+    </html>
